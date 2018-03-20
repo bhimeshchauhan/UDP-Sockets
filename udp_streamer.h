@@ -14,7 +14,8 @@
 int socketsd;
 int socketcd;
 int sourcePort;
-int sourceLen;
+unsigned int sourceLen;
+int drop;
 int destPort;
 int destLen;
 struct sockaddr_in sourceaddr;

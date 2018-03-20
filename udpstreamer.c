@@ -40,13 +40,28 @@ void s_bind()
         error("ERROR on binding");
     }
     
+    setsockopt(socketcd, SOL_SOCKET, SO_REUSEADDR,
+         (const void *)&flag , sizeof(int));
+    bzero((char *) &destaddr, sizeof(destaddr));
+    destaddr.sin_family = AF_INET;
+    destaddr.sin_addr.s_addr = htonl(INADDR_ANY);
+    destaddr.sin_port = htons((unsigned short)sourcePort);
+    if (bind(socketcd, (struct sockaddr *) &destaddr, sizeof(destaddr)) < 0)
+    {
+        error("ERROR on binding");
+    }
+    
 }
 
 
 
 int main(int argc, char **argv)
 {
-
+    //Declare drops
+    drop = 0;
+    if( rand()%100 < loss_rate )
+         drop = 1;
+    
     // Check Command Line input
     if (argc != 6)
     {
@@ -89,10 +104,16 @@ int main(int argc, char **argv)
         
         
         // Send to with Loss Rate
-        msgsize = sendto(socketsd, buf, strlen(buf), 0,
-           (struct sockaddr *) &destaddr, destLen);
-        if (msgsize < 0)
-          error("ERROR in sendto");
+        if (!drop)
+        {
+            msgsize = sendto(socketsd, buf, strlen(buf), 0, (struct sockaddr *) &destaddr, destLen);
+            if (msgsize < 0)
+                error("ERROR in sendto");
+        }
+        else
+        {
+            printf("Dropping few data");
+        }
         
     }
     return 0;
